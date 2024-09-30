@@ -23,14 +23,11 @@ public class StoryReader {
         //create ObjectMapper instance
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
+        Game game = objectMapper.readValue(jsonData, Game.class);
 
-        System.out.println(jsonData.length);
-
-
-       Game emp = objectMapper.readValue(jsonData, Game.class);
-
-
-        System.out.println(emp);
+        // StoryTeller initialisieren und das Spiel starten, beginnend mit "room-one"
+        StoryTeller storyteller = new StoryTeller(game.rooms(), "room-one");
+        storyteller.startGame();
     }
 
 
