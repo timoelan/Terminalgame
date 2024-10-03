@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class StoryReader {
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record Game(String description, Map<String, Room > rooms) {
+    record Game(String description, Map<String, Room > rooms, String startRoom) {
         record Room(String name, String description, Map <String, Map <String, List<Action>>> verbs) {
             @JsonIgnoreProperties(ignoreUnknown = true)
             record Action(String room, String message) {}
@@ -26,7 +26,7 @@ public class StoryReader {
         Game game = objectMapper.readValue(jsonData, Game.class);
 
         // StoryTeller initialisieren und das Spiel starten, beginnend mit "room-one"
-        StoryTeller storyteller = new StoryTeller(game.rooms(), "room-one");
+        StoryTeller storyteller = new StoryTeller(game);
         storyteller.startGame();
     }
 
