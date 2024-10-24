@@ -1,50 +1,88 @@
 package org.example;
+import java.text.MessageFormat;
 import java.util.*;
 public class StoryTeller {
+Console console = new Console();
     String currentRoomID = null;
     StoryReader.Game game;
     Set<String> states = new HashSet<>();
+
     Set<String> bag = new HashSet<>();
     boolean resentChangedRoom;
+
+    Map<String, String> synonyms = new HashMap<>();
 
     public StoryTeller(StoryReader.Game game) {
         this.game = game;
         this.currentRoomID = game.startRoom();
     }
 
-    private static final String ANSI_RESET = "\u001B[0m";
-    private static final String ANSI_GREEN = "\u001B[32m";
+    public void restartGame(){
+        resetGame();
+        startGame();
+    }
+    public void resetGame() {
+        currentRoomID = game.startRoom();
+        states.clear();
+        bag.clear();
+        resentChangedRoom = true;
+    }
+
+
+
     public void startGame(){
 
-        System.out.println(ANSI_GREEN + game.description() + ANSI_RESET);
-        Scanner scanner = new Scanner(System.in);
+        console.displayMessage(game.description());
+
 
 
         while (true) {
 
             StoryReader.Game.Room currentRoom = game.rooms().get(currentRoomID);
+
+            for (String verb : game.verbs().keySet()){
+                List<String>synonymList = game.verbs().get(verb).synonyms();
+                if (synonymList == null){
+                    continue;
+                }
+                for (String synonym : synonymList) {
+                    synonyms.put(synonym ,verb);
+                }
+
+            }
+
             if (resentChangedRoom) {
-                System.out.println(currentRoom.description());
+                console.displayMessage(currentRoom.description());
                 resentChangedRoom = false;
             }
-            System.out.print(currentRoom.name() + "  >> ");
-            String input = scanner.nextLine();
+            console.displayMessage(currentRoom.name() + "  >> ");
 
-            String[] parsedInput = ProccesInput(input, currentRoom);
 
-            String verb = parsedInput[0];
+            Console.UserInput parsedInput = console.getInput();
+
+            String verbOrSynonym = parsedInput.verb();
+            String verb = synonyms.get(verbOrSynonym);
+            if (verb == null){
+                verb = verbOrSynonym;
+            }
             Map<String, List<StoryReader.Game.Room.Action>> currentVerb = currentRoom.verbs().get(verb);
 
+
             if (currentVerb == null) {
-                System.out.println("That Verb doesn't exist");
+                console.displayErrorMessage(getVerbErrorMessage(verb));
                 continue;
             }
 
+
+
+
             boolean runNextAction = true;
-            String object = parsedInput[1];
+            String object = parsedInput.object();
             List<StoryReader.Game.Room.Action> currentActions = currentVerb.get(object);
             if (currentActions == null) {
-                System.out.println(currentVerb.keySet());
+                console.displayMessage(currentVerb.keySet().toString());
+                console.displayErrorMessage(MessageFormat.format(game.verbs().get(verb).errors().object(), object));
+
                 continue;
             }
 
@@ -59,29 +97,53 @@ public class StoryTeller {
 
                 String message = activeAction.message();
                 if (message != null) {
-                    System.out.println(message);
+                    console.displayMessage(message);
                 }
 
                 if (activeAction.room() != null){
+
                     currentRoomID = activeAction.room();
                     resentChangedRoom = true;
                 }
 
+
                 String addState = activeAction.addState();
                 if (addState != null) {
+
                     if (!bag.contains(addState)) {
                         bag.add(addState);
                     }
                 }
                 runNextAction = false;
+
+            }
+
+
+            if (bag.contains("gameOver")){
+                console.displayGameOverMessage("GAME OVER");
+                restartGame();
+
+            }
+            if (bag.contains("youWon")){
+                console.displaySuccessMessage("You Won!!");
+                restartGame();
             }
         }
+
     }
-    private String[] ProccesInput(String input, StoryReader.Game.Room room) {
-        String[] parts = input.split(" ");
-        String verb = parts[0];
-        String object = parts.length > 1 ? parts[1] : "";
-        return new String[]{verb, object};
+
+    private String getVerbErrorMessage(String verb) {
+        String verbErrorMessage;
+        if(!game.verbs().containsKey(verb)){
+            verbErrorMessage = game.verbs().get("default").errors().verb();
+        }
+        else {
+           verbErrorMessage = game.verbs().get(verb).errors().verb();
+            if (verbErrorMessage == null) {
+                verbErrorMessage = game.verbs().get("default").errors().verb();
+            }
+        }
+        return verbErrorMessage;
     }
 
 

@@ -74,7 +74,6 @@ rooms: # Map<String, Room>
     verbs:
       go:
         west:
-          -
           - room: room-two
 # global verbs: here we define defaults and error-messages
 verbs:
@@ -93,20 +92,20 @@ verbs:
   go:
     synonyms: [ walk, drive, climb, move ]
     errors:
-      verb: You can't go there! # if the room does not know the verb 'go' at all
-      object: You can't go {} from here! # if the room does know 'go' but not the object
+      verb: You cant go there! # if the room does not know the verb 'go' at all
+      object: You cant go {0} from here! # if the room does know 'go' but not the object
   take:
     synonyms: [ grab, get, pick ]
     errors:
-      verb: There's nothing to take!
-      object: You can't take {}!
+      verb: Theres nothing to take!
+      object: You cant take {0}!
   look:
     synonyms: [ examine ]
     errors:
       verb: Nothing to look at in here!
-      object: You cannot look at {}!
+      object: You cannot look at {0}!
   open:
     synonyms: [ unlock ]
     errors:
       verb: Nothing to open here!
-      object: You cannot open {}!
+      object: You cannot open {0}!

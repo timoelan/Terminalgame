@@ -1,0 +1,183 @@
+startRoom: cursed-foyer
+description: |
+  Welcome to the Forsaken Manor, a place steeped in darkness and despair. The air is heavy with the weight of untold secrets, and the shadows seem to shift and breathe around you. 
+  Those who enter this cursed estate often find themselves ensnared in its web of treachery, for not all who wander within its walls emerge unscathed. 
+  Move cautiously, for many rooms hold twisted puzzles that guard their secrets, and failure to solve them may seal your fate. 
+  Listen closely, for the manor whispers its dark truths only to the brave. Beware, for riddles await you, challenging your wits and resolve.
+  
+  Hint: to solve some puzzles you need to type in solve + answer or just use the synonym
+rooms:
+  cursed-foyer:
+    name: Cursed Foyer
+    description: |
+      You stand in the cold, desolate foyer of the manor. The air is thick with dust, and cobwebs cling to every surface.
+      Theres a grand staircase leading up to the north, but an eerie chill runs down your spine as you gaze at it.
+      To the west is a hallway shrouded in darkness. Faint whispers echo from beyond the door.
+    verbs:
+      go:
+        north:
+          - room: dark-hallway
+        west:
+          - room: trap-room-three
+      look:
+        staircase:
+          - message: "The staircase looms before you, casting long, ominous shadows. Theres something off about it."
+        door:
+          - message: "An old, creaky door, slightly ajar. It looks like it hasnt been used in ages."
+  dark-hallway:
+    name: Dark Hallway
+    description: |
+      The hallway stretches far into the gloom. The air is cold, and every step you take echoes unnervingly.
+      Faint candlelight flickers in the distance, casting unsettling shadows on the walls.
+      Theres a door to the east, but you feel like something is watching you from the dark.
+    verbs:
+      go:
+        east:
+          - room: haunted-library
+        south:
+          - room: cursed-foyer
+      look:
+        shadows:
+          - message: "The shadows seem to move on their own, creeping ever closer the longer you stare."
+        candles:
+          - message: "Old, half-melted candles barely illuminating the hallway. They flicker, as if disturbed by an unseen presence."
+  haunted-library:
+    name: Haunted Library
+    description: |
+      You step into a vast library, but the air is thick with dread. Dust-covered books line the shelves, and theres a strange hum in the air.
+      The scent of mildew and old leather fills your nose. In the center of the room, an old grand piano sits eerily untouched.
+    verbs:
+      go:
+        west:
+          - room: dark-hallway
+        north:
+          - ifState: hiddenKey
+            room: secret-vault
+        south:
+          - room: the-prison
+      look:
+        piano:
+          - message: "An old grand piano. One of the keys looks out of place, as if it holds a secret."
+      play:
+        piano:
+          - message: "You press the off-key note, and a small key falls out of the piano!"
+            addState: hiddenKey
+      take:
+        key:
+          - ifState: hiddenKey
+            message: "You take the small key, wondering what it unlocks."
+            addState: key
+          - message: "I cant see a Key, but an old grand piano. I wonder how it sounds..."
+  the-prison:
+    name: The Prison of death
+    description: |
+      The moment you step inside, the door slams shut behind you with an eerie finality.
+      The air is thick with the stench of decay, and bloodstains cover the stone floor.
+      A sinister, guttural voice echoes in the darkness: "You have walked into your doom, and there is no escape, dont even try it..."
+    verbs:
+      go:
+        west:
+          - ifState: gameOver
+
+          - message: "As you turn to flee, razor-sharp chains spring from the walls, wrapping around your limbs. You scream, but its too late. The chains tighten, severing flesh and bone in an instant. Your vision fades to black as your body is torn apart."
+            addState: gameOver
+
+      look:
+        walls:
+          - message: "The walls are covered in fresh blood, still dripping. This place is a tomb, and you are its latest victim."
+  trap-room-three:
+    name: Room of Despair
+    description: |
+      The moment you enter, the door slams shut behind you.
+      Theres no way out unless you solve the riddle whispered by the walls.
+    verbs:
+      go:
+        north:
+          - ifState: trapRoomThreeSolved
+            room: cursed-foyer
+
+        west:
+          - message: "The door is sealed tight. No escape until the puzzle is solved."
+
+      listen:
+        walls:
+          - message: "A whispering voice echoes around you, asking: I speak without a mouth and hear without ears. I have no body, but I come alive with the wind. What am I?"
+
+      solve:
+        echo:
+          - message: "The walls groan and shift, revealing a hidden door to the north."
+            addState: trapRoomThreeSolved
+
+  secret-vault:
+    name: The Vault of Shadows
+    description: |
+      Hidden behind a secret passage lies the Vault of Shadows. The air here is so cold, you can see your breath.
+      Shadows twist unnaturally, and the treasure chest in the middle of the room pulses with a strange energy.
+    verbs:
+      go:
+        south:
+          - room: haunted-library
+      look:
+        chest:
+          - message: "A large, ornate chest. It pulses with an eerie light, as if alive."
+      open:
+        chest:
+          - message: "Inside the chest is a dark relic. Its power is overwhelming, but you know its dangerous to take it without understanding its nature first."
+      take:
+        relic:
+          - message: "You dare to take the relic. Darkness swirls around you, and you feel its cursed power. A voice echoes in your mind, urging you: This is your only chance to destroy it! If you fail, you will be lost forever!"
+            addState: relicTaken
+
+      destroy:
+        relic:
+          - ifState: relicTaken
+            message: "Du versuchst, das Relikt zu zerstören, aber die dunkle Macht hat bereits einen Teil von dir eingenommen. Ein schreckliches Geschrei ertönt, während die Schatten dich umhüllen und deine Seele in die Dunkelheit ziehen. Es war dein einziger Versuch, und du bist gescheitert."
+            addState: gameOver
+
+          - message: "Mit einem entschlossenen Blick auf das Relikt, das vor dir liegt, spürst du die Macht der Dunkelheit, die es umgibt. Du hast den Mut, dich dem Bösen entgegenzustellen. Mit einem kraftvollen Schlag zerbrichst du das Relikt, und ein gleißendes Licht durchbricht die Dunkelheit. Die Schatten weichen zurück, und du spürst, wie die Freiheit zurückkehrt. Du hast das Böse besiegt und die Welt gerettet. Du gewinnst!"
+            addState: youWon
+
+
+# Globale Verben und Fehlerbehandlung
+verbs:
+  default:
+    errors:
+      verb: "Your action is in vain."
+      object: ""
+  go:
+    synonyms: [ walk, move ]
+    errors:
+      verb: "You feel trapped. There is no way to move."
+      object: "You cant go {0} from here!"
+  take:
+    synonyms: [ grab, pick ]
+    errors:
+      verb: "Theres nothing to take here."
+      object: "You cant take {0}!"
+  look:
+    synonyms: [ examine, inspect ]
+    errors:
+      verb: "Theres nothing of interest here."
+      object: "You cant look at {0}!"
+  solve:
+    synonyms: [ answer, fix ]
+    errors:
+      verb: "There is no puzzle to solve here."
+      object: "You cant solve {0}!"
+  listen:
+    synonyms: [ hear ]
+    errors:
+      verb: "Theres nothing to listen to."
+      object: "You hear nothing from {0}."
+  play:
+    synonyms: [ use, touch ]
+    errors:
+      verb: "You cant play that."
+      object: "You cant play {0} here."
+  destroy:
+    synonyms: [ break, annihilate ]
+    errors:
+      verb: "You cant destroy that."
+      object: "You cant destroy {0}!"
+
+
